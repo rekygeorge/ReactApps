@@ -21,7 +21,7 @@ const  NoteCard = ({
                 <span className='text-xs text-slate-500'>{moment(date).format('Do MMM YYYY')}</span>
             </div>
 
-            <MdOutlinePushPin className={`icon-btn ${isPinned ? 'text-primary' : 'text-slate-300'}`} onClick={onPinNote} />
+            <MdOutlinePushPin className={`icon-btn ${isPinned ? 'text-primary' : 'text-slate-300'} hover:text-blue-600`} onClick={onPinNote} />
         </div>
 
         <p className='text-xs text-sl'>{content?.slice(0,60)}</p>

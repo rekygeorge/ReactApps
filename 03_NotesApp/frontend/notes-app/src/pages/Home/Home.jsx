@@ -30,6 +30,8 @@ const Home = () => {
   const [allNotes, setAllNotes] = useState([]);
   const [ userInfo , setUserInfo] = useState(null);
 
+  const [isSearch, setIsSearch] = useState(false);
+
   const navigate = useNavigate();
 
   const handleEdit = (noteDetails) => {
@@ -105,6 +107,28 @@ const Home = () => {
     }
   }
 
+
+  // Search fot a Note
+  const onSearchNote = async(query) => {
+    try{
+      const response = await axiosInstance.get('/search-notes', {
+        params: {query},
+      });
+
+      if (response.data && response.data.notes){
+        setIsSearch(true);
+        setAllNotes(response.data.notes);
+      }
+    }catch(error){
+      console.log(error);
+    }
+  }
+
+  const handleClearSearch = () => {
+    setIsSearch(false);
+    getAllNotes();
+  };
+
   useEffect(() => {
     getAllNotes();
     getUserInfo();
@@ -113,6 +137,26 @@ const Home = () => {
 
   }, []);
 
+  const updateIsPinned = async (noteData) => {
+    const noteId = noteData._id;
+    console.log('passed pin status : ', !noteData.isPinned);
+      try{
+          const response = await axiosInstance.put('/update-note-pinned/'+noteId, {
+              "isPinned" : !noteData.isPinned,
+          });
+
+          if (response.data && response.data.note) {
+              showToastMessage('Note Updated Successfully');
+              getAllNotes();
+          }
+      }catch(error){
+          if (error.response && error.response.data && error.response.data.message){
+            console.log(error);
+          }
+      }
+  }
+
+
   const testVal ={
     fullName : 'Hello World',
     email : 'Hello World'
@@ -120,7 +164,7 @@ const Home = () => {
 
   return (
     <>
-      <Navbar userInfo = {userInfo}/>
+      <Navbar userInfo = {userInfo} onSearchNote={onSearchNote} handleClearSearch={handleClearSearch}/>
 
       <div className='container mx-auto'>
 
@@ -135,12 +179,11 @@ const Home = () => {
               isPinned={item.isPinned}
               onEdit={() => {handleEdit(item)}}
               onDelete={() => {deleteNote(item)}}
-              onPinNote={() => {}}
+              onPinNote={() => {updateIsPinned(item)}}
           />
           ))}</div> : <EmptyCard
-                        imgSrc={AddNotesImg}
-                        message='Start creating your first note "Add" button to jot 
-                          down your thoughts, Lets get started'
+                        imgSrc={isSearch ? NoDataImg : AddNotesImg}
+                        message={isSearch ? `Oops! No notes found matching` :'Start creating your first note "Add" button to jot own your thoughts, Lets get started'}
                           />
           }
 
